@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    restart: unless-stopped
+    ports:
+      - "3000:8080" 
+    environment:
+      - WEBUI_SECRET_KEY=2307078903
+      - PIPELINES_URLS=http://pipelines:9099
+      - ENABLE_SIGNUP=True
+      - DEFAULT_MODELS=main
+    volumes:
+      - open-webui-data:/app/backend/data
+    depends_on:
+      - pipelines
+    networks:
+      - gpthub-network
+
+  pipelines:
+    image: ghcr.io/open-webui/pipelines:main
+    container_name: pipelines
+    restart: "no" 
+    ports:
+      - "9099:9099"
+    environment:
+      - PIPELINES_URL=http://pipelines:9099
+      - PIPELINES_API_KEY=0000
+      - MWS_API_KEY="Вставляем ключ!!!"
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./pipelines_logic:/app/pipelines 
+    entrypoint: 
+      - /bin/sh
+      - -c
+      - |
+        if [ -f /app/pipelines/requirements.txt ]; then
+          pip install --no-cache-dir -r /app/pipelines/requirements.txt
+        fi
+        exec /app/start.sh
+    networks:
+      - gpthub-network
+
+volumes:
+  open-webui-data:
+
+networks:
+  gpthub-network:
+    driver: bridge

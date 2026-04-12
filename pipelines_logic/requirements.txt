@@ -1,0 +1,6 @@
+torch
+sentence-transformers
+httpx
+aiosqlite
+beautifulsoup4
+pydantic

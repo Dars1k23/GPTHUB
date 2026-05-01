@@ -1,6 +1,24 @@
 version: '3.8'
 
 services:
+  db:
+    image: postgres:15-alpine
+    container_name: gpthub-db
+    restart: always
+    environment:
+      POSTGRES_DB: openwebui
+      POSTGRES_USER: gpthub_admin
+      POSTGRES_PASSWORD: AFsanchous230707
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gpthub_admin -d openwebui"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - gpthub-network
+
   open-webui:
     image: ghcr.io/open-webui/open-webui:main
     container_name: open-webui
@@ -9,13 +27,19 @@ services:
       - "3000:8080" 
     environment:
       - WEBUI_SECRET_KEY=2307078903
+      - DATABASE_URL=postgresql://gpthub_admin:AFsanchous230707@db:5432/openwebui
       - PIPELINES_URLS=http://pipelines:9099
       - ENABLE_SIGNUP=True
       - DEFAULT_MODELS=main
+      - OPENAI_API_BASE_URL=https://openrouter.ai/api/v1
+      - OPENAI_API_KEY=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
     volumes:
       - open-webui-data:/app/backend/data
     depends_on:
-      - pipelines
+      db:
+        condition: service_healthy
+      pipelines:
+        condition: service_started  
     networks:
       - gpthub-network
 
@@ -28,7 +52,9 @@ services:
     environment:
       - PIPELINES_URL=http://pipelines:9099
       - PIPELINES_API_KEY=0000
-      - MWS_API_KEY="Вставляем ключ!!!"
+      - MWS_API_KEY="AIzaSyDJ0Q7SCGt68IZXEdzNCkdSixfZnZVYysA"
+      - OPENAI_API_BASE_URL=https://openrouter.ai/api/v1
+      - OPENAI_API_KEY=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
       - PYTHONUNBUFFERED=1
     volumes:
       - ./pipelines_logic:/app/pipelines 
@@ -45,6 +71,7 @@ services:
 
 volumes:
   open-webui-data:
+  postgres_data:
 
 networks:
   gpthub-network:

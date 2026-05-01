@@ -6,9 +6,9 @@ services:
     container_name: gpthub-db
     restart: always
     environment:
-      POSTGRES_DB: openwebui
-      POSTGRES_USER: gpthub_admin
-      POSTGRES_PASSWORD: AFsanchous230707
+      POSTGRES_DB:
+      POSTGRES_USER: 
+      POSTGRES_PASSWORD: 
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -26,12 +26,12 @@ services:
     ports:
       - "3000:8080" 
     environment:
-      - WEBUI_SECRET_KEY=2307078903
-      - DATABASE_URL=postgresql://gpthub_admin:AFsanchous230707@db:5432/openwebui
+      - WEBUI_SECRET_KEY=
+      - DATABASE_URL=
       - PIPELINES_URLS=http://pipelines:9099
       - ENABLE_SIGNUP=True
       - DEFAULT_MODELS=main
-      - OPENAI_API_BASE_URL=https://openrouter.ai/api/v1
+      - OPENAI_API_BASE_URL=
       - OPENAI_API_KEY=
     volumes:
       - open-webui-data:/app/backend/data
@@ -53,7 +53,7 @@ services:
       - PIPELINES_URL=http://pipelines:9099
       - PIPELINES_API_KEY=0000
       - MWS_API_KEY=
-      - OPENAI_API_BASE_URL=https://openrouter.ai/api/v1
+      - OPENAI_API_BASE_URL=
       - OPENAI_API_KEY=
       - PYTHONUNBUFFERED=1
     volumes:

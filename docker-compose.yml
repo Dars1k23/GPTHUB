@@ -32,7 +32,7 @@ services:
       - ENABLE_SIGNUP=True
       - DEFAULT_MODELS=main
       - OPENAI_API_BASE_URL=https://openrouter.ai/api/v1
-      - OPENAI_API_KEY=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
+      - OPENAI_API_KEY=
     volumes:
       - open-webui-data:/app/backend/data
     depends_on:
@@ -52,9 +52,9 @@ services:
     environment:
       - PIPELINES_URL=http://pipelines:9099
       - PIPELINES_API_KEY=0000
-      - MWS_API_KEY="AIzaSyDJ0Q7SCGt68IZXEdzNCkdSixfZnZVYysA"
+      - MWS_API_KEY=
       - OPENAI_API_BASE_URL=https://openrouter.ai/api/v1
-      - OPENAI_API_KEY=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
+      - OPENAI_API_KEY=
       - PYTHONUNBUFFERED=1
     volumes:
       - ./pipelines_logic:/app/pipelines 

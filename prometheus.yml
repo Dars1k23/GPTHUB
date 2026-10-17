@@ -1,0 +1,15 @@
+global:
+  scrape_interval: 15s      # Как часто собирать данные (раз в 15 секунд)
+  evaluation_interval: 15s  # Как часто проверять правила алертов
+
+scrape_configs:
+  # 1. Мониторинг самого движка Prometheus (здоровье системы мониторинга)
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # 2. Мониторинг Docker-контейнеров (cAdvisor)
+  # Отсюда мы узнаем, сколько памяти и процессора ест база, веб-интерфейс и пайплайны
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']

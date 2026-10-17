@@ -6,9 +6,9 @@ services:
     container_name: gpthub-db
     restart: always
     environment:
-      POSTGRES_DB:
-      POSTGRES_USER: 
-      POSTGRES_PASSWORD: 
+      POSTGRES_DB: openwebui
+      POSTGRES_USER: gpthub_admin
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -26,13 +26,13 @@ services:
     ports:
       - "3000:8080" 
     environment:
-      - WEBUI_SECRET_KEY=
-      - DATABASE_URL=
-      - PIPELINES_URLS=http://pipelines:9099
+      - WEBUI_SECRET_KEY={$WEBUI_SECRET_KEY}
+      - DATABASE_URL=postgresql://gpthub_admin:AFsanchous230707@db:5432/openwebui
+        # - PIPELINES_URLS=http://pipelines:9099
       - ENABLE_SIGNUP=True
       - DEFAULT_MODELS=main
-      - OPENAI_API_BASE_URL=
-      - OPENAI_API_KEY=
+      - OPENAI_API_BASE_URL=https://openrouter.ai/api/v1
+      - OPENAI_API_KEY= ${OPENAPI_API_KEY}
     volumes:
       - open-webui-data:/app/backend/data
     depends_on:
@@ -50,11 +50,11 @@ services:
     ports:
       - "9099:9099"
     environment:
-      - PIPELINES_URL=http://pipelines:9099
-      - PIPELINES_API_KEY=0000
-      - MWS_API_KEY=
-      - OPENAI_API_BASE_URL=
-      - OPENAI_API_KEY=
+      # - PIPELINES_URL=http://pipelines:9099
+      - PIPELINES_API_KEY= ${PIPELINES_API_KEY}
+      - MWS_API_KEY= ${MWS_API_KEY}
+      - OPENAI_API_BASE_URL=https://openrouter.ai/api/v1
+      - OPENAI_API_KEY= ${OPEN_API_KEY}
       - PYTHONUNBUFFERED=1
     volumes:
       - ./pipelines_logic:/app/pipelines 
@@ -69,9 +69,55 @@ services:
     networks:
       - gpthub-network
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml 
+      - prometheus_data:/prometheus 
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - gpthub-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD= ${GF_SECURITY_ADMIN_PASSWORD}
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - gpthub-network
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.2
+    container_name: cadvisor
+    restart: unless-stopped
+    privileged: true
+    devices:
+      - /dev/kmsg
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    networks:
+      - gpthub-network
+
 volumes:
   open-webui-data:
   postgres_data:
+  prometheus_data:
+  grafana_data:
 
 networks:
   gpthub-network:
